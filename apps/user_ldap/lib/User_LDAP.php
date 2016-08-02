@@ -179,7 +179,7 @@ class User_LDAP extends BackendUtility implements \OCP\IUserBackend, \OCP\UserIn
 		));
 		$attrs = array($this->access->connection->ldapUserDisplayName, 'dn');
 		$additionalAttribute = $this->access->connection->ldapUserDisplayName2;
-		if((is_string($additionalAttribute)) && ($additionalAttribute !== '')) {
+		if($additionalAttribute !== '') {
 			$attrs[] = $additionalAttribute;
 		}
 
@@ -365,7 +365,7 @@ class User_LDAP extends BackendUtility implements \OCP\IUserBackend, \OCP\UserIn
 		//Check whether the display name is configured to have a 2nd feature
 		$additionalAttribute = $this->access->connection->ldapUserDisplayName2;
 		$displayName2 = '';
-		if((is_string($additionalAttribute)) && ($additionalAttribute !== '')) {
+		if($additionalAttribute !== '') {
 			$displayName2 = $this->access->readAttribute(
 				$this->access->username2dn($uid),
 				$additionalAttribute);
@@ -377,9 +377,8 @@ class User_LDAP extends BackendUtility implements \OCP\IUserBackend, \OCP\UserIn
 
 		if($displayName && (count($displayName) > 0)) {
 			$displayName = $displayName[0];
-
-			if(is_array($displayName2) && (count($displayName2) > 0)) {
-				$displayName2 = $displayName2[0];
+			if(is_array($displayName2)){
+				$displayName2 = count($displayName2) > 0 ? $displayName2[0] : '';
 			}
 
 			$user = $this->access->userManager->get($uid);
