@@ -454,16 +454,27 @@ class User {
 		$quotaDefault = $this->connection->ldapQuotaDefault;
 		$quota = $quotaDefault !== '' ? $quotaDefault : null;
 		$quota = !is_null($valueFromLDAP) ? $valueFromLDAP : $quota;
+		\OC::$server->getLogger()->warning("BEFORE IF QUOTA: $valueFromLDAP  $quota $quotaDefault", ['app' => 'user_ldap']);
 
 		if(is_null($valueFromLDAP)) {
 			$quotaAttribute = $this->connection->ldapQuotaAttribute;
 			if(!empty($quotaAttribute)) {
 				$aQuota = $this->access->readAttribute($this->dn, $quotaAttribute);
+				\OC::$server->getLogger()->warning("AQUOTA ".$this->getUsername() . " TO " . json_encode($aQuota), ['app' => 'user_ldap']);
 				if($aQuota && (count($aQuota) > 0)) {
 					$quota = $aQuota[0];
+				} else {
+					$thisDump = print_r($this, true);
+					$thisStack = print_r(debug_backtrace(), true);
+					\OC::$server->getLogger()->warning("NO quota returned from ldap FOR ".$this->uid . ' DUMP:' . $thisDump . ' STACK:' . $thisStack, ['app' => 'user_ldap']);
 				}
+			} else {
+				$thisDump = print_r($this, true);
+				$thisStack = print_r(debug_backtrace(), true);
+				\OC::$server->getLogger()->warning("NO ldapQuotaAttribute FOR ".$this->uid . ' DUMP:' . $thisDump . ' STACK:' . $thisStack, ['app' => 'user_ldap']);
 			}
 		}
+		\OC::$server->getLogger()->warning("UPDATING QUOTA FOR ".$this->getUsername() . " TO " . $quota, ['app' => 'user_ldap']);
 		if(!is_null($quota)) {
 			$user = $this->userManager->get($this->uid)->setQuota($quota);
 		}
